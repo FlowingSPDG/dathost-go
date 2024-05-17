@@ -191,3 +191,13 @@ type GameServerMetrics struct {
 	AllTimePlayers     []any               `json:"all_time_players"` // TODO...
 	MapsPlayed         []MapPlayed         `json:"maps_played"`
 }
+
+type StartGameServerBody struct {
+	AllowHostReassignment bool
+}
+
+func (sgsb *StartGameServerBody) ToFormData() *url.Values {
+	ret := &url.Values{}
+	ret.Add("allow_host_reassignment", fmt.Sprintf("%t", sgsb.AllowHostReassignment))
+	return ret
+}

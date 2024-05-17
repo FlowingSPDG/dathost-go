@@ -33,7 +33,7 @@ func (dc *dathostClientv01) ListGameServers() ([]GameServer, error) {
 }
 
 // CreateGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) CreateGameServer(data *CreateGameServerRequest) (*GameServer, error) {
+func (dc *dathostClientv01) CreateGameServer(data CreateGameServerRequest) (*GameServer, error) {
 	ep := "https://dathost.net/api/0.1/game-servers"
 	encoded := data.ToFormData().Encode()
 	req, _ := http.NewRequest("POST", ep, strings.NewReader(encoded))
@@ -48,11 +48,11 @@ func (dc *dathostClientv01) CreateGameServer(data *CreateGameServerRequest) (*Ga
 	}
 	defer res.Body.Close()
 
-	var server *GameServer
+	var server GameServer
 	if err := json.NewDecoder(res.Body).Decode(&server); err != nil {
 		return nil, err
 	}
-	return server, nil
+	return &server, nil
 }
 
 // DeleteGameServer implements DatHostClientv01.
@@ -86,15 +86,15 @@ func (dc *dathostClientv01) GetGameServer(id string) (*GameServer, error) {
 	}
 	defer res.Body.Close()
 
-	var server *GameServer
+	var server GameServer
 	if err := json.NewDecoder(res.Body).Decode(&server); err != nil {
 		return nil, err
 	}
-	return server, nil
+	return &server, nil
 }
 
 // UpdateGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) UpdateGameServer(id string, data *CreateGameServerRequest) error {
+func (dc *dathostClientv01) UpdateGameServer(id string, data CreateGameServerRequest) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s", id)
 	encoded := data.ToFormData().Encode()
 	req, _ := http.NewRequest("PUT", ep, strings.NewReader(encoded))
@@ -126,9 +126,9 @@ func (dc *dathostClientv01) GetGameServerMetrics(id string) (*GameServerMetrics,
 	}
 	defer res.Body.Close()
 
-	var metrics *GameServerMetrics
+	var metrics GameServerMetrics
 	if err := json.NewDecoder(res.Body).Decode(&metrics); err != nil {
 		return nil, err
 	}
-	return metrics, nil
+	return &metrics, nil
 }

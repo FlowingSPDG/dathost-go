@@ -10,7 +10,7 @@ import (
 func main() {
 	client := common.MustGetClient()
 
-	req := &dathost.CreateGameServerRequest{
+	req := dathost.CreateGameServerRequest{
 		AutoStop:                     false,
 		AutoStopMinutes:              0,
 		Confirmed:                    true,

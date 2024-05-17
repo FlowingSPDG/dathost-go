@@ -23,19 +23,19 @@ func NewDathostClientv01(username, password string) DatHostClientv01 {
 type DatHostClientv01 interface {
 	// General APIs
 	ListGameServers() ([]GameServer, error)
-	CreateGameServer(req *CreateGameServerRequest) (*GameServer, error)
+	CreateGameServer(req CreateGameServerRequest) (*GameServer, error)
 	DeleteGameServer(id string) error
 	GetGameServer(id string) (*GameServer, error)
-	UpdateGameServer(id string, req *CreateGameServerRequest) error
+	UpdateGameServer(id string, req CreateGameServerRequest) error
 	GetGameServerMetrics(id string) (*GameServerMetrics, error)
 	// UpdateSubscription(id string) // https://dathost.readme.io/reference/post_api-0-1-game-servers-server-id-subscription // TODO.
 
 	// Actions API
-	// DuplicateGameServer(id string) error
-	// ResetGameServer(id string) error
-	// StartGameServer(id string) error
-	// StopGameServer(id string) error
-	// SyncFilesGameServer(id string) error
+	DuplicateGameServer(id string) (*GameServer, error)
+	ResetGameServer(id string) error
+	StartGameServer(id string, data StartGameServerBody) error
+	StopGameServer(id string) error
+	// SyncFilesGameServer(id string) error // https://dathost.readme.io/reference/post_game_server_sync_files // TODO.
 
 	// File Management API
 	// ListFilesOnGameServer(id string) ([]string, error)

@@ -35,7 +35,7 @@ type DatHostClientv01 interface {
 	ResetGameServer(id string) error
 	StartGameServer(id string, data StartGameServerBody) error
 	StopGameServer(id string) error
-	// SyncFilesGameServer(id string) error // https://dathost.readme.io/reference/post_game_server_sync_files // TODO.
+	SyncFilesGameServer(id string) error
 
 	// File Management API
 	// ListFilesOnGameServer(id string) ([]string, error)

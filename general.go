@@ -97,7 +97,6 @@ func (dc *dathostClientv01) UpdateGameServer(id string, data CreateGameServerReq
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s", id)
 	b := &bytes.Buffer{}
 	contentType := data.ToFormData(b)
-	fmt.Println("contentType:", contentType)
 
 	req, _ := http.NewRequest("PUT", ep, b)
 	dc.addHeader(req)

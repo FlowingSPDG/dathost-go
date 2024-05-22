@@ -47,8 +47,8 @@ type DatHostClientv01 interface {
 	// UnzipFileOnGameServer(id string, path string) error
 
 	// // Console API
-	// GetLastLineOfConsole(id string) (string, error)
-	// SendCommandToConsole(id string, command string) error
+	GetLastLineFromConsole(id string, maxLines int) (*GetLastLineFromConsoleResponse, error)
+	SendCommandToConsole(id string, command string) error
 
 	// // CS2 API
 	// StartCS2Match

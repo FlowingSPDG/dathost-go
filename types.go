@@ -1,7 +1,10 @@
 package dathost
 
 import (
+	"bytes"
 	"fmt"
+	"mime/multipart"
+	"net/textproto"
 	"net/url"
 )
 
@@ -114,7 +117,10 @@ type CreateGameServerRequest struct {
 	ScheduledCommands string // ?
 	ServerImage       string // default is "default", or "ubuntu-20.04"
 	UserData          string // custom metadata
+	CS2Settings       CS2SettingsForm
+}
 
+type CS2SettingsForm struct {
 	// CS2
 	SteamGameServerLoginToken    string
 	DisableBots                  bool
@@ -133,46 +139,55 @@ type CreateGameServerRequest struct {
 	Slots                        int
 }
 
-func (cgsr *CreateGameServerRequest) ToFormData() *url.Values {
-	ret := &url.Values{}
-	ret.Add("added_voice_server", cgsr.AddedVoiceServer)
-	ret.Add("auto_stop", fmt.Sprintf("%t", cgsr.AutoStop))
-	ret.Add("auto_stop_minutes", fmt.Sprintf("%d", cgsr.AutoStopMinutes))
-	ret.Add("confirmed", fmt.Sprintf("%t", cgsr.Confirmed))
-	ret.Add("custom_domain", cgsr.CustomDomain)
-	ret.Add("delete_protection", fmt.Sprintf("%t", cgsr.DeleteProtection))
-	ret.Add("enable_core_dump", fmt.Sprintf("%t", cgsr.EnableCoreDump))
-	ret.Add("enable_mysql", fmt.Sprintf("%t", cgsr.EnableMySQL))
-	ret.Add("enable_syntropy", fmt.Sprintf("%t", cgsr.EnableSyntropy))
-	ret.Add("game", cgsr.Game)
-	ret.Add("location", cgsr.Location)
-	ret.Add("manual_sort_order", fmt.Sprintf("%d", cgsr.ManualSortOrder))
-	ret.Add("max_disk_usage_gb", fmt.Sprintf("%d", cgsr.MaxDiskUsageGb))
-	ret.Add("name", cgsr.Name)
-	ret.Add("prefer_dedicated", fmt.Sprintf("%t", cgsr.PreferDedicated))
-	ret.Add("reboot_on_crash", fmt.Sprintf("%t", cgsr.RebootOnCrash))
-	ret.Add("scheduled_commands", cgsr.ScheduledCommands)
-	ret.Add("server_image", cgsr.ServerImage)
-	ret.Add("user_data", cgsr.UserData)
+func (cgsr *CreateGameServerRequest) ToFormData(b *bytes.Buffer) string {
+	mw := multipart.NewWriter(b)
+
+	mw.WriteField("added_voice_server", cgsr.AddedVoiceServer)
+	mw.WriteField("auto_stop", fmt.Sprintf("%t", cgsr.AutoStop))
+	mw.WriteField("auto_stop_minutes", fmt.Sprintf("%d", cgsr.AutoStopMinutes))
+	mw.WriteField("confirmed", fmt.Sprintf("%t", cgsr.Confirmed))
+	mw.WriteField("custom_domain", cgsr.CustomDomain)
+	mw.WriteField("delete_protection", fmt.Sprintf("%t", cgsr.DeleteProtection))
+	mw.WriteField("enable_core_dump", fmt.Sprintf("%t", cgsr.EnableCoreDump))
+	mw.WriteField("enable_mysql", fmt.Sprintf("%t", cgsr.EnableMySQL))
+	mw.WriteField("enable_syntropy", fmt.Sprintf("%t", cgsr.EnableSyntropy))
+	mw.WriteField("game", cgsr.Game)
+	mw.WriteField("location", cgsr.Location)
+	mw.WriteField("manual_sort_order", fmt.Sprintf("%d", cgsr.ManualSortOrder))
+	mw.WriteField("max_disk_usage_gb", fmt.Sprintf("%d", cgsr.MaxDiskUsageGb))
+	mw.WriteField("name", cgsr.Name)
+	mw.WriteField("prefer_dedicated", fmt.Sprintf("%t", cgsr.PreferDedicated))
+	mw.WriteField("reboot_on_crash", fmt.Sprintf("%t", cgsr.RebootOnCrash))
+	mw.WriteField("scheduled_commands", cgsr.ScheduledCommands)
+	mw.WriteField("server_image", cgsr.ServerImage)
+	mw.WriteField("user_data", cgsr.UserData)
 
 	// CS2
-	ret.Add("steam_game_server_login_token", cgsr.SteamGameServerLoginToken)
-	ret.Add("disable_bots", fmt.Sprintf("%t", cgsr.DisableBots))
-	ret.Add("enable_gotv", fmt.Sprintf("%t", cgsr.EnableGOTV))
-	ret.Add("enable_gotv_secondary", fmt.Sprintf("%t", cgsr.EnableGOTVSecondary))
-	ret.Add("game_mode", cgsr.GameMode)
-	ret.Add("insecure", fmt.Sprintf("%t", cgsr.Insecure))
-	ret.Add("maps_source", cgsr.MapsSource)
-	ret.Add("mapgroup", cgsr.MapGroup)
-	ret.Add("mapgroup_start_map", cgsr.MapGroupStartMap)
-	ret.Add("workshop_collection_id", cgsr.WorkshopCollectionID)
-	ret.Add("workshop_collection_start_map_id", cgsr.WorkshopCollectionStartMapID)
-	ret.Add("workshop_single_map_id", cgsr.WorkshopSingleMapID)
-	ret.Add("password", cgsr.Password)
-	ret.Add("rcon", cgsr.RCON)
-	ret.Add("slots", fmt.Sprintf("%d", cgsr.Slots))
+	mh := make(textproto.MIMEHeader)
+	mh.Set("content-type", "multipart/form-data")
+	mw.CreatePart(mh)
+	mw.WriteField("cs2_settings.steam_game_server_login_token", cgsr.CS2Settings.SteamGameServerLoginToken)
+	mw.WriteField("cs2_settings.disable_bots", fmt.Sprintf("%t", cgsr.CS2Settings.DisableBots))
+	mw.WriteField("cs2_settings.enable_gotv", fmt.Sprintf("%t", cgsr.CS2Settings.EnableGOTV))
+	mw.WriteField("cs2_settings.enable_gotv_secondary", fmt.Sprintf("%t", cgsr.CS2Settings.EnableGOTVSecondary))
+	mw.WriteField("cs2_settings.game_mode", cgsr.CS2Settings.GameMode)
+	mw.WriteField("cs2_settings.insecure", fmt.Sprintf("%t", cgsr.CS2Settings.Insecure))
+	mw.WriteField("cs2_settings.maps_source", cgsr.CS2Settings.MapsSource)
+	mw.WriteField("cs2_settings.mapgroup", cgsr.CS2Settings.MapGroup)
+	mw.WriteField("cs2_settings.mapgroup_start_map", cgsr.CS2Settings.MapGroupStartMap)
+	mw.WriteField("cs2_settings.workshop_collection_id", cgsr.CS2Settings.WorkshopCollectionID)
+	mw.WriteField("cs2_settings.workshop_collection_start_map_id", cgsr.CS2Settings.WorkshopCollectionStartMapID)
+	mw.WriteField("cs2_settings.workshop_single_map_id", cgsr.CS2Settings.WorkshopSingleMapID)
+	mw.WriteField("cs2_settings.password", cgsr.CS2Settings.Password)
+	mw.WriteField("cs2_settings.rcon", cgsr.CS2Settings.RCON)
+	mw.WriteField("cs2_settings.slots", fmt.Sprintf("%d", cgsr.CS2Settings.Slots))
 
-	return ret
+	contentType := mw.FormDataContentType()
+
+	mw.Close()
+
+	return contentType
+
 }
 
 type PlayerOnlineGraph struct {

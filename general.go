@@ -1,12 +1,11 @@
 package dathost
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 // ListGameServers implements DatHostClientv01.
@@ -35,12 +34,12 @@ func (dc *dathostClientv01) ListGameServers() ([]GameServer, error) {
 // CreateGameServer implements DatHostClientv01.
 func (dc *dathostClientv01) CreateGameServer(data CreateGameServerRequest) (*GameServer, error) {
 	ep := "https://dathost.net/api/0.1/game-servers"
-	encoded := data.ToFormData().Encode()
-	req, _ := http.NewRequest("POST", ep, strings.NewReader(encoded))
+	b := &bytes.Buffer{}
+	contentType := data.ToFormData(b)
 
+	req, _ := http.NewRequest("PUT", ep, b)
 	dc.addHeader(req)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Content-Length", strconv.Itoa(len(encoded)))
+	req.Header.Add("Content-Type", contentType)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -96,12 +95,13 @@ func (dc *dathostClientv01) GetGameServer(id string) (*GameServer, error) {
 // UpdateGameServer implements DatHostClientv01.
 func (dc *dathostClientv01) UpdateGameServer(id string, data CreateGameServerRequest) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s", id)
-	encoded := data.ToFormData().Encode()
-	req, _ := http.NewRequest("PUT", ep, strings.NewReader(encoded))
-	dc.addHeader(req)
+	b := &bytes.Buffer{}
+	contentType := data.ToFormData(b)
+	fmt.Println("contentType:", contentType)
 
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Content-Length", strconv.Itoa(len(encoded)))
+	req, _ := http.NewRequest("PUT", ep, b)
+	dc.addHeader(req)
+	req.Header.Add("Content-Type", contentType)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

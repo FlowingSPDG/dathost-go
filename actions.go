@@ -86,5 +86,18 @@ func (dc *dathostClientv01) StopGameServer(id string) error {
 
 // SyncFilesGameServer implements DatHostClientv01.
 func (dc *dathostClientv01) SyncFilesGameServer(id string) error {
-	panic("unimplemented")
+	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/sync-files", id)
+	req, _ := http.NewRequest("POST", ep, nil)
+
+	dc.addHeader(req)
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	_ = body
+
+	return nil
 }

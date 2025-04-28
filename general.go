@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"golang.org/x/xerrors"
 )
 
 // ListGameServers implements DatHostClientv01.
@@ -98,17 +100,18 @@ func (dc *dathostClientv01) UpdateGameServer(id string, data CreateGameServerReq
 	b := &bytes.Buffer{}
 	contentType := data.ToFormData(b)
 
-	req, _ := http.NewRequest("PUT", ep, b)
+	req, err := http.NewRequest("PUT", ep, b)
+	if err != nil {
+		return xerrors.Errorf("failed to create request: %w", err)
+	}
 	dc.addHeader(req)
 	req.Header.Add("Content-Type", contentType)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return xerrors.Errorf("failed to send request: %w", err)
 	}
 	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
-	_ = body
 
 	return nil
 }

@@ -11,7 +11,9 @@ func main() {
 	client := common.MustGetClient()
 
 	req := dathost.CreateGameServerRequest{
+		AddedVoiceServer:  "",
 		AutoStop:          false,
+		EnableSyntropy:    false,
 		AutoStopMinutes:   0,
 		Confirmed:         true,
 		CustomDomain:      "",

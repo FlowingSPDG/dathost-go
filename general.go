@@ -37,7 +37,10 @@ func (dc *dathostClientv01) ListGameServers() ([]GameServer, error) {
 func (dc *dathostClientv01) CreateGameServer(data CreateGameServerRequest) (*GameServer, error) {
 	ep := "https://dathost.net/api/0.1/game-servers"
 	b := &bytes.Buffer{}
-	contentType := data.ToFormData(b)
+	contentType, err := data.ToFormData(b)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to create form data: %w", err)
+	}
 
 	req, _ := http.NewRequest("PUT", ep, b)
 	dc.addHeader(req)
@@ -98,7 +101,10 @@ func (dc *dathostClientv01) GetGameServer(id string) (*GameServer, error) {
 func (dc *dathostClientv01) UpdateGameServer(id string, data CreateGameServerRequest) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s", id)
 	b := &bytes.Buffer{}
-	contentType := data.ToFormData(b)
+	contentType, err := data.ToFormData(b)
+	if err != nil {
+		return xerrors.Errorf("failed to create form data: %w", err)
+	}
 
 	req, err := http.NewRequest("PUT", ep, b)
 	if err != nil {

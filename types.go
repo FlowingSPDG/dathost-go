@@ -2,9 +2,12 @@ package dathost
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"net/url"
+
+	"golang.org/x/xerrors"
 )
 
 type CS2Settings struct {
@@ -143,7 +146,7 @@ type CS2SettingsForm struct {
 	MetamodPlugins               []string
 }
 
-func (cgsr *CreateGameServerRequest) ToFormData(b *bytes.Buffer) string {
+func (cgsr *CreateGameServerRequest) ToFormData(b *bytes.Buffer) (string, error) {
 	mw := multipart.NewWriter(b)
 
 	mw.WriteField("id", cgsr.ID)
@@ -188,13 +191,21 @@ func (cgsr *CreateGameServerRequest) ToFormData(b *bytes.Buffer) string {
 	mw.WriteField("cs2_settings.disable_bots", fmt.Sprintf("%t", cgsr.CS2Settings.DisableBots))
 	mw.WriteField("cs2_settings.game_mode", cgsr.CS2Settings.GameMode)
 	mw.WriteField("cs2_settings.enable_metamod", fmt.Sprintf("%t", cgsr.CS2Settings.EnableMetamod))
-	mw.WriteField("cs2_settings.metamod_plugins", fmt.Sprintf("%v", cgsr.CS2Settings.MetamodPlugins))
+	// MetamodPluginsをJSON形式の文字列に変換して送信
+	metamodPluginsJSON, err := json.Marshal(cgsr.CS2Settings.MetamodPlugins)
+	if err != nil {
+		return "", xerrors.Errorf("failed to marshal metamod plugins: %w", err)
+	}
+	mw.WriteField("cs2_settings.metamod_plugins", string(metamodPluginsJSON))
 	mw.WriteField("cs2_settings.private_server", "true")
 
 	contentType := mw.FormDataContentType()
-	mw.Close()
 
-	return contentType
+	if err := mw.Close(); err != nil {
+		return "", xerrors.Errorf("failed to close multipart writer: %w", err)
+	}
+
+	return contentType, nil
 }
 
 type PlayerOnlineGraph struct {

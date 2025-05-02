@@ -2,10 +2,12 @@ package dathost
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"mime/multipart"
-	"net/textproto"
 	"net/url"
+
+	"golang.org/x/xerrors"
 )
 
 type CS2Settings struct {
@@ -98,6 +100,12 @@ type GameServer struct {
 }
 
 type CreateGameServerRequest struct {
+	ID        string
+	CreatedAt int
+	Name      string
+	Game      string
+	Location  string
+
 	AddedVoiceServer  string
 	AutoStop          bool
 	AutoStopMinutes   int
@@ -107,11 +115,8 @@ type CreateGameServerRequest struct {
 	EnableCoreDump    bool
 	EnableMySQL       bool
 	EnableSyntropy    bool
-	Game              string // cs2. required
-	Location          string // https://dathost.net/reference/server-locations-mapping
 	ManualSortOrder   int
 	MaxDiskUsageGb    int
-	Name              string // required.
 	PreferDedicated   bool
 	RebootOnCrash     bool
 	ScheduledCommands string // ?
@@ -137,57 +142,70 @@ type CS2SettingsForm struct {
 	Password                     string
 	RCON                         string
 	Slots                        int
+	EnableMetamod                bool
+	MetamodPlugins               []string
 }
 
-func (cgsr *CreateGameServerRequest) ToFormData(b *bytes.Buffer) string {
+func (cgsr *CreateGameServerRequest) ToFormData(b *bytes.Buffer) (string, error) {
 	mw := multipart.NewWriter(b)
 
-	mw.WriteField("added_voice_server", cgsr.AddedVoiceServer)
-	mw.WriteField("auto_stop", fmt.Sprintf("%t", cgsr.AutoStop))
-	mw.WriteField("auto_stop_minutes", fmt.Sprintf("%d", cgsr.AutoStopMinutes))
-	mw.WriteField("confirmed", fmt.Sprintf("%t", cgsr.Confirmed))
-	mw.WriteField("custom_domain", cgsr.CustomDomain)
-	mw.WriteField("delete_protection", fmt.Sprintf("%t", cgsr.DeleteProtection))
-	mw.WriteField("enable_core_dump", fmt.Sprintf("%t", cgsr.EnableCoreDump))
-	mw.WriteField("enable_mysql", fmt.Sprintf("%t", cgsr.EnableMySQL))
-	mw.WriteField("enable_syntropy", fmt.Sprintf("%t", cgsr.EnableSyntropy))
+	mw.WriteField("id", cgsr.ID)
+	mw.WriteField("created_at", fmt.Sprintf("%d", cgsr.CreatedAt))
+	mw.WriteField("name", cgsr.Name)
 	mw.WriteField("game", cgsr.Game)
 	mw.WriteField("location", cgsr.Location)
-	mw.WriteField("manual_sort_order", fmt.Sprintf("%d", cgsr.ManualSortOrder))
+	mw.WriteField("players_online", "0")
+	mw.WriteField("status", "[]")
+	mw.WriteField("booting", "false")
+	mw.WriteField("on", "false")
+	mw.WriteField("confirmed", fmt.Sprintf("%t", cgsr.Confirmed))
 	mw.WriteField("max_disk_usage_gb", fmt.Sprintf("%d", cgsr.MaxDiskUsageGb))
-	mw.WriteField("name", cgsr.Name)
+	mw.WriteField("enable_mysql", fmt.Sprintf("%t", cgsr.EnableMySQL))
+	mw.WriteField("autostop", fmt.Sprintf("%t", cgsr.AutoStop))
+	mw.WriteField("autostop_minutes", fmt.Sprintf("%d", cgsr.AutoStopMinutes))
+	mw.WriteField("enable_core_dump", fmt.Sprintf("%t", cgsr.EnableCoreDump))
 	mw.WriteField("prefer_dedicated", fmt.Sprintf("%t", cgsr.PreferDedicated))
-	mw.WriteField("reboot_on_crash", fmt.Sprintf("%t", cgsr.RebootOnCrash))
-	mw.WriteField("scheduled_commands", cgsr.ScheduledCommands)
+	mw.WriteField("enable_syntropy", fmt.Sprintf("%t", cgsr.EnableSyntropy))
 	mw.WriteField("server_image", cgsr.ServerImage)
-	mw.WriteField("user_data", cgsr.UserData)
+	mw.WriteField("reboot_on_crash", fmt.Sprintf("%t", cgsr.RebootOnCrash))
+	mw.WriteField("manual_sort_order", fmt.Sprintf("%d", cgsr.ManualSortOrder))
+	mw.WriteField("custom_domain", cgsr.CustomDomain)
+	mw.WriteField("scheduled_commands", cgsr.ScheduledCommands)
+	mw.WriteField("deletion_protection", fmt.Sprintf("%t", cgsr.DeleteProtection))
+	mw.WriteField("ongoing_maintenance", "false")
 
-	// CS2
-	mh := make(textproto.MIMEHeader)
-	mh.Set("content-type", "multipart/form-data")
-	mw.CreatePart(mh)
+	// CS2 Settings
+	mw.WriteField("cs2_settings.slots", fmt.Sprintf("%d", cgsr.CS2Settings.Slots))
 	mw.WriteField("cs2_settings.steam_game_server_login_token", cgsr.CS2Settings.SteamGameServerLoginToken)
-	mw.WriteField("cs2_settings.disable_bots", fmt.Sprintf("%t", cgsr.CS2Settings.DisableBots))
-	mw.WriteField("cs2_settings.enable_gotv", fmt.Sprintf("%t", cgsr.CS2Settings.EnableGOTV))
-	mw.WriteField("cs2_settings.enable_gotv_secondary", fmt.Sprintf("%t", cgsr.CS2Settings.EnableGOTVSecondary))
-	mw.WriteField("cs2_settings.game_mode", cgsr.CS2Settings.GameMode)
-	mw.WriteField("cs2_settings.insecure", fmt.Sprintf("%t", cgsr.CS2Settings.Insecure))
+	mw.WriteField("cs2_settings.rcon", cgsr.CS2Settings.RCON)
+	mw.WriteField("cs2_settings.password", cgsr.CS2Settings.Password)
 	mw.WriteField("cs2_settings.maps_source", cgsr.CS2Settings.MapsSource)
 	mw.WriteField("cs2_settings.mapgroup", cgsr.CS2Settings.MapGroup)
 	mw.WriteField("cs2_settings.mapgroup_start_map", cgsr.CS2Settings.MapGroupStartMap)
 	mw.WriteField("cs2_settings.workshop_collection_id", cgsr.CS2Settings.WorkshopCollectionID)
 	mw.WriteField("cs2_settings.workshop_collection_start_map_id", cgsr.CS2Settings.WorkshopCollectionStartMapID)
 	mw.WriteField("cs2_settings.workshop_single_map_id", cgsr.CS2Settings.WorkshopSingleMapID)
-	mw.WriteField("cs2_settings.password", cgsr.CS2Settings.Password)
-	mw.WriteField("cs2_settings.rcon", cgsr.CS2Settings.RCON)
-	mw.WriteField("cs2_settings.slots", fmt.Sprintf("%d", cgsr.CS2Settings.Slots))
+	mw.WriteField("cs2_settings.insecure", fmt.Sprintf("%t", cgsr.CS2Settings.Insecure))
+	mw.WriteField("cs2_settings.enable_gotv", fmt.Sprintf("%t", cgsr.CS2Settings.EnableGOTV))
+	mw.WriteField("cs2_settings.enable_gotv_secondary", fmt.Sprintf("%t", cgsr.CS2Settings.EnableGOTVSecondary))
+	mw.WriteField("cs2_settings.disable_bots", fmt.Sprintf("%t", cgsr.CS2Settings.DisableBots))
+	mw.WriteField("cs2_settings.game_mode", cgsr.CS2Settings.GameMode)
+	mw.WriteField("cs2_settings.enable_metamod", fmt.Sprintf("%t", cgsr.CS2Settings.EnableMetamod))
+	// MetamodPluginsをJSON形式の文字列に変換して送信
+	metamodPluginsJSON, err := json.Marshal(cgsr.CS2Settings.MetamodPlugins)
+	if err != nil {
+		return "", xerrors.Errorf("failed to marshal metamod plugins: %w", err)
+	}
+	mw.WriteField("cs2_settings.metamod_plugins", string(metamodPluginsJSON))
+	mw.WriteField("cs2_settings.private_server", "true")
 
 	contentType := mw.FormDataContentType()
 
-	mw.Close()
+	if err := mw.Close(); err != nil {
+		return "", xerrors.Errorf("failed to close multipart writer: %w", err)
+	}
 
-	return contentType
-
+	return contentType, nil
 }
 
 type PlayerOnlineGraph struct {

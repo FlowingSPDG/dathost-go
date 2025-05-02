@@ -11,7 +11,9 @@ func main() {
 	client := common.MustGetClient()
 
 	req := dathost.CreateGameServerRequest{
+		AddedVoiceServer:  "",
 		AutoStop:          false,
+		EnableSyntropy:    false,
 		AutoStopMinutes:   0,
 		Confirmed:         true,
 		CustomDomain:      "",
@@ -44,6 +46,8 @@ func main() {
 			Password:                     "lo3jp",
 			RCON:                         "dathost",
 			Slots:                        10,
+			EnableMetamod:                true,
+			MetamodPlugins:               []string{"654a32ea452c94f085961b91", "65538a41f7b98449a05fe3b9"}, // CounterStrikeSharp / MatchZy
 		},
 	}
 

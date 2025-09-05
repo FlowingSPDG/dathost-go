@@ -20,3 +20,6 @@ func MustGetClient() dathost.DatHostClientv01 {
 	client := dathost.NewDathostClientv01(username, password)
 	return client
 }
+
+
+

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -11,9 +12,12 @@ func main() {
 	client := common.MustGetClient()
 	serverID := os.Args[1]
 
-	server, err := client.GetGameServerMetrics(serverID)
+	server, err := client.GetGameServerMetrics(context.Background(), serverID)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("server:", server)
 }
+
+
+

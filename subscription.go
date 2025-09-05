@@ -1,6 +1,7 @@
 package dathost
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -8,7 +9,7 @@ import (
 )
 
 // UpdateSubscription implements DatHostClientv01.
-func (dc *dathostClientv01) UpdateSubscription(id string, req UpdateSubscriptionRequest) error {
+func (dc *dathostClientv01) UpdateSubscription(ctx context.Context, id string, req UpdateSubscriptionRequest) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/subscription", id)
 
 	data := url.Values{}
@@ -17,7 +18,7 @@ func (dc *dathostClientv01) UpdateSubscription(id string, req UpdateSubscription
 		data.Set("months", fmt.Sprintf("%d", req.Months))
 	}
 
-	httpReq, err := http.NewRequest("POST", ep, strings.NewReader(data.Encode()))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", ep, strings.NewReader(data.Encode()))
 	if err != nil {
 		return err
 	}

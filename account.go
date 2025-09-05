@@ -1,6 +1,7 @@
 package dathost
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,10 +9,10 @@ import (
 )
 
 // GetCurrentAccount implements DatHostClientv01.
-func (dc *dathostClientv01) GetCurrentAccount() (*Account, error) {
+func (dc *dathostClientv01) GetCurrentAccount(ctx context.Context) (*Account, error) {
 	ep := "https://dathost.net/api/0.1/account"
 
-	req, err := http.NewRequest("GET", ep, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", ep, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -31,10 +32,10 @@ func (dc *dathostClientv01) GetCurrentAccount() (*Account, error) {
 }
 
 // ListInvoices implements DatHostClientv01.
-func (dc *dathostClientv01) ListInvoices() ([]Invoice, error) {
+func (dc *dathostClientv01) ListInvoices(ctx context.Context) ([]Invoice, error) {
 	ep := "https://dathost.net/api/0.1/account/invoices"
 
-	req, err := http.NewRequest("GET", ep, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", ep, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -54,10 +55,10 @@ func (dc *dathostClientv01) ListInvoices() ([]Invoice, error) {
 }
 
 // GetInvoiceAsHTML implements DatHostClientv01.
-func (dc *dathostClientv01) GetInvoiceAsHTML(id string) (string, error) {
+func (dc *dathostClientv01) GetInvoiceAsHTML(ctx context.Context, id string) (string, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/account/invoices/%s", id)
 
-	req, err := http.NewRequest("GET", ep, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", ep, nil)
 	if err != nil {
 		return "", err
 	}

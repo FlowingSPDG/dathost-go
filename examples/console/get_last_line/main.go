@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -12,7 +13,7 @@ func main() {
 
 	serverID := os.Args[1]
 
-	resp, err := client.GetLastLineFromConsole(serverID, 100)
+	resp, err := client.GetLastLineFromConsole(context.Background(), serverID, 100)
 	if err != nil {
 		panic(err)
 	}
@@ -20,3 +21,6 @@ func main() {
 		fmt.Printf("LINE[%d]: %s\n", i+1, line)
 	}
 }
+
+
+

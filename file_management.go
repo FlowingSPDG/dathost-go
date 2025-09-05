@@ -2,6 +2,7 @@ package dathost
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,7 +16,7 @@ import (
 )
 
 // ListFilesOnGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) ListFilesOnGameServer(id string, path string) ([]FileInfo, error) {
+func (dc *dathostClientv01) ListFilesOnGameServer(ctx context.Context, id string, path string) ([]FileInfo, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/files", id)
 	u, _ := url.Parse(ep)
 
@@ -25,7 +26,7 @@ func (dc *dathostClientv01) ListFilesOnGameServer(id string, path string) ([]Fil
 	}
 	u.RawQuery = q.Encode()
 
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,7 @@ func (dc *dathostClientv01) ListFilesOnGameServer(id string, path string) ([]Fil
 }
 
 // DeleteFilesFromGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) DeleteFilesFromGameServer(id string, path string) error {
+func (dc *dathostClientv01) DeleteFilesFromGameServer(ctx context.Context, id string, path string) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/files", id)
 	u, _ := url.Parse(ep)
 
@@ -53,7 +54,7 @@ func (dc *dathostClientv01) DeleteFilesFromGameServer(id string, path string) er
 	q.Set("path", path)
 	u.RawQuery = q.Encode()
 
-	req, err := http.NewRequest("DELETE", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", u.String(), nil)
 	if err != nil {
 		return err
 	}
@@ -69,7 +70,7 @@ func (dc *dathostClientv01) DeleteFilesFromGameServer(id string, path string) er
 }
 
 // DownloadFileFromGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) DownloadFileFromGameServer(id string, path string) ([]byte, error) {
+func (dc *dathostClientv01) DownloadFileFromGameServer(ctx context.Context, id string, path string) ([]byte, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/files", id)
 	u, _ := url.Parse(ep)
 
@@ -78,7 +79,7 @@ func (dc *dathostClientv01) DownloadFileFromGameServer(id string, path string) (
 	q.Set("download", "1")
 	u.RawQuery = q.Encode()
 
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +99,7 @@ func (dc *dathostClientv01) DownloadFileFromGameServer(id string, path string) (
 }
 
 // UploadFileToGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) UploadFileToGameServer(id string, path string, data []byte) error {
+func (dc *dathostClientv01) UploadFileToGameServer(ctx context.Context, id string, path string, data []byte) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/files", id)
 
 	var b bytes.Buffer
@@ -123,7 +124,7 @@ func (dc *dathostClientv01) UploadFileToGameServer(id string, path string, data 
 		return xerrors.Errorf("failed to close multipart writer: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", ep, &b)
+	req, err := http.NewRequestWithContext(ctx, "POST", ep, &b)
 	if err != nil {
 		return err
 	}
@@ -140,14 +141,14 @@ func (dc *dathostClientv01) UploadFileToGameServer(id string, path string, data 
 }
 
 // MoveFileOnGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) MoveFileOnGameServer(id string, from string, to string) error {
+func (dc *dathostClientv01) MoveFileOnGameServer(ctx context.Context, id string, from string, to string) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/files", id)
 
 	data := url.Values{}
 	data.Set("from", from)
 	data.Set("to", to)
 
-	req, err := http.NewRequest("PUT", ep, strings.NewReader(data.Encode()))
+	req, err := http.NewRequestWithContext(ctx, "PUT", ep, strings.NewReader(data.Encode()))
 	if err != nil {
 		return err
 	}
@@ -164,10 +165,10 @@ func (dc *dathostClientv01) MoveFileOnGameServer(id string, from string, to stri
 }
 
 // RegenerateFTPPasswordForGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) RegenerateFTPPasswordForGameServer(id string) (*FTPPasswordResponse, error) {
+func (dc *dathostClientv01) RegenerateFTPPasswordForGameServer(ctx context.Context, id string) (*FTPPasswordResponse, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/regenerate-ftp-password", id)
 
-	req, err := http.NewRequest("POST", ep, nil)
+	req, err := http.NewRequestWithContext(ctx, "POST", ep, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -187,13 +188,13 @@ func (dc *dathostClientv01) RegenerateFTPPasswordForGameServer(id string) (*FTPP
 }
 
 // UnzipFileOnGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) UnzipFileOnGameServer(id string, path string) error {
+func (dc *dathostClientv01) UnzipFileOnGameServer(ctx context.Context, id string, path string) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/unzip", id)
 
 	data := url.Values{}
 	data.Set("path", path)
 
-	req, err := http.NewRequest("POST", ep, strings.NewReader(data.Encode()))
+	req, err := http.NewRequestWithContext(ctx, "POST", ep, strings.NewReader(data.Encode()))
 	if err != nil {
 		return err
 	}

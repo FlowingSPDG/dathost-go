@@ -2,6 +2,7 @@ package dathost
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,7 +13,7 @@ import (
 )
 
 // SendCommandToConsole implements DatHostClientv01.
-func (dc *dathostClientv01) SendCommandToConsole(id string, command string) error {
+func (dc *dathostClientv01) SendCommandToConsole(ctx context.Context, id string, command string) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/console", id)
 	b := &bytes.Buffer{}
 	mw := multipart.NewWriter(b)
@@ -20,7 +21,7 @@ func (dc *dathostClientv01) SendCommandToConsole(id string, command string) erro
 	contentType := mw.FormDataContentType()
 	mw.Close()
 
-	req, _ := http.NewRequest("POST", ep, b)
+	req, _ := http.NewRequestWithContext(ctx, "POST", ep, b)
 	dc.addHeader(req)
 	req.Header.Add("Content-Type", contentType)
 
@@ -40,7 +41,7 @@ type GetLastLineFromConsoleResponse struct {
 }
 
 // GetLastLineFromConsole implements DatHostClientv01.
-func (dc *dathostClientv01) GetLastLineFromConsole(id string, maxLines int) (*GetLastLineFromConsoleResponse, error) {
+func (dc *dathostClientv01) GetLastLineFromConsole(ctx context.Context, id string, maxLines int) (*GetLastLineFromConsoleResponse, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/console", id)
 	u, _ := url.Parse(ep)
 
@@ -49,7 +50,7 @@ func (dc *dathostClientv01) GetLastLineFromConsole(id string, maxLines int) (*Ge
 	q.Set("max_lines", strconv.Itoa(maxLines))
 	u.RawQuery = q.Encode()
 
-	req, _ := http.NewRequest("GET", u.String(), nil)
+	req, _ := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
 	dc.addHeader(req)
 
 	res, err := http.DefaultClient.Do(req)

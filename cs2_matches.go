@@ -1,6 +1,7 @@
 package dathost
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,13 +10,13 @@ import (
 )
 
 // StartCS2Match implements DatHostClientv01.
-func (dc *dathostClientv01) StartCS2Match(id string, req StartCS2MatchRequest) (*CS2Match, error) {
+func (dc *dathostClientv01) StartCS2Match(ctx context.Context, id string, req StartCS2MatchRequest) (*CS2Match, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/cs2/matches", id)
 
 	data := url.Values{}
 	data.Set("config", req.Config)
 
-	httpReq, err := http.NewRequest("POST", ep, strings.NewReader(data.Encode()))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", ep, strings.NewReader(data.Encode()))
 	if err != nil {
 		return nil, err
 	}
@@ -36,10 +37,10 @@ func (dc *dathostClientv01) StartCS2Match(id string, req StartCS2MatchRequest) (
 }
 
 // GetCS2Match implements DatHostClientv01.
-func (dc *dathostClientv01) GetCS2Match(id string) (*CS2Match, error) {
+func (dc *dathostClientv01) GetCS2Match(ctx context.Context, id string) (*CS2Match, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/cs2/matches", id)
 
-	req, err := http.NewRequest("GET", ep, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", ep, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,10 +60,10 @@ func (dc *dathostClientv01) GetCS2Match(id string) (*CS2Match, error) {
 }
 
 // CancelCS2Match implements DatHostClientv01.
-func (dc *dathostClientv01) CancelCS2Match(id string) error {
+func (dc *dathostClientv01) CancelCS2Match(ctx context.Context, id string) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/cs2/matches", id)
 
-	req, err := http.NewRequest("DELETE", ep, nil)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", ep, nil)
 	if err != nil {
 		return err
 	}
@@ -78,14 +79,14 @@ func (dc *dathostClientv01) CancelCS2Match(id string) error {
 }
 
 // AddPlayerToCS2Match implements DatHostClientv01.
-func (dc *dathostClientv01) AddPlayerToCS2Match(id string, req AddPlayerToCS2MatchRequest) error {
+func (dc *dathostClientv01) AddPlayerToCS2Match(ctx context.Context, id string, req AddPlayerToCS2MatchRequest) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/cs2/matches/players", id)
 
 	data := url.Values{}
 	data.Set("steam_id", req.SteamID)
 	data.Set("team", req.Team)
 
-	httpReq, err := http.NewRequest("POST", ep, strings.NewReader(data.Encode()))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", ep, strings.NewReader(data.Encode()))
 	if err != nil {
 		return err
 	}

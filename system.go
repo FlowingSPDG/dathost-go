@@ -1,15 +1,16 @@
 package dathost
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 )
 
 // GetCustomDomains implements DatHostClientv01.
-func (dc *dathostClientv01) GetCustomDomains() ([]CustomDomain, error) {
+func (dc *dathostClientv01) GetCustomDomains(ctx context.Context) ([]CustomDomain, error) {
 	ep := "https://dathost.net/api/0.1/custom-domains"
 
-	req, err := http.NewRequest("GET", ep, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", ep, nil)
 	if err != nil {
 		return nil, err
 	}

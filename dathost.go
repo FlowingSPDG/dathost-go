@@ -38,23 +38,34 @@ type DatHostClientv01 interface {
 	SyncFilesGameServer(id string) error
 
 	// File Management API
-	// ListFilesOnGameServer(id string) ([]string, error)
-	// DeleteFilesFromGameServer(id string, path string) error
-	// DownloadFileFromGameServer(id string, path string) ([]byte, error)
-	// UploadFileToGameServer(id string, path string, data []byte) error
-	// MoveFileOnGameServer(id string, from string, to string) error
-	// RegenerateFTPPasswordForGameServer(id string) error
-	// UnzipFileOnGameServer(id string, path string) error
+	ListFilesOnGameServer(id string, path string) ([]FileInfo, error)
+	DeleteFilesFromGameServer(id string, path string) error
+	DownloadFileFromGameServer(id string, path string) ([]byte, error)
+	UploadFileToGameServer(id string, path string, data []byte) error
+	MoveFileOnGameServer(id string, from string, to string) error
+	RegenerateFTPPasswordForGameServer(id string) (*FTPPasswordResponse, error)
+	UnzipFileOnGameServer(id string, path string) error
 
 	// // Console API
 	GetLastLineFromConsole(id string, maxLines int) (*GetLastLineFromConsoleResponse, error)
 	SendCommandToConsole(id string, command string) error
 
-	// // CS2 API
-	// StartCS2Match
-	// GetCS2Match
-	// CancelCS2Match
-	// AddPlayerForCS2Match
+	// CS2 Matches API
+	StartCS2Match(id string, req StartCS2MatchRequest) (*CS2Match, error)
+	GetCS2Match(id string) (*CS2Match, error)
+	CancelCS2Match(id string) error
+	AddPlayerToCS2Match(id string, req AddPlayerToCS2MatchRequest) error
+
+	// Account API
+	GetCurrentAccount() (*Account, error)
+	ListInvoices() ([]Invoice, error)
+	GetInvoiceAsHTML(id string) (string, error)
+
+	// System API
+	GetCustomDomains() ([]CustomDomain, error)
+
+	// Subscription API
+	UpdateSubscription(id string, req UpdateSubscriptionRequest) error
 }
 
 func (dc *dathostClientv01) addHeader(req *http.Request) {

@@ -234,3 +234,69 @@ func (sgsb *StartGameServerBody) ToFormData() *url.Values {
 	ret.Add("allow_host_reassignment", fmt.Sprintf("%t", sgsb.AllowHostReassignment))
 	return ret
 }
+
+// File Management API Types
+type FileInfo struct {
+	Name        string `json:"name"`
+	IsDirectory bool   `json:"is_directory"`
+	Size        int64  `json:"size"`
+	ModifiedAt  int    `json:"modified_at"`
+	Permissions string `json:"permissions"`
+}
+
+type FTPPasswordResponse struct {
+	FTPPassword string `json:"ftp_password"`
+}
+
+// CS2 Matches API Types
+type StartCS2MatchRequest struct {
+	Config string `json:"config"`
+}
+
+type CS2Match struct {
+	ID          string `json:"id"`
+	ServerID    string `json:"server_id"`
+	Config      string `json:"config"`
+	ConnectCode string `json:"connect_code"`
+	Status      string `json:"status"`
+	CreatedAt   int    `json:"created_at"`
+	StartedAt   int    `json:"started_at"`
+	EndedAt     int    `json:"ended_at"`
+}
+
+type AddPlayerToCS2MatchRequest struct {
+	SteamID string `json:"steam_id"`
+	Team    string `json:"team"`
+}
+
+// Account API Types
+type Account struct {
+	ID                string  `json:"id"`
+	Email             string  `json:"email"`
+	Credits           float64 `json:"credits"`
+	CreditsUsed       float64 `json:"credits_used"`
+	CreditsRemaining  float64 `json:"credits_remaining"`
+	SubscriptionState string  `json:"subscription_state"`
+}
+
+type Invoice struct {
+	ID          string  `json:"id"`
+	Amount      float64 `json:"amount"`
+	Currency    string  `json:"currency"`
+	Status      string  `json:"status"`
+	CreatedAt   int     `json:"created_at"`
+	PaidAt      int     `json:"paid_at"`
+	Description string  `json:"description"`
+}
+
+// System API Types
+type CustomDomain struct {
+	Domain string `json:"domain"`
+	Status string `json:"status"`
+}
+
+// Subscription API Types
+type UpdateSubscriptionRequest struct {
+	Action string `json:"action"` // "purchase", "cancel", "switch_to_pay_as_you_go"
+	Months int    `json:"months,omitempty"`
+}

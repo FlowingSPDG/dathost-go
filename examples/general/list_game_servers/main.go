@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/FlowingSPDG/dathost-go/examples/common"
@@ -9,7 +10,7 @@ import (
 func main() {
 	client := common.MustGetClient()
 
-	servers, err := client.ListGameServers()
+	servers, err := client.ListGameServers(context.Background())
 	if err != nil {
 		panic(err)
 	}

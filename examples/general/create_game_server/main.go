@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/FlowingSPDG/dathost-go"
@@ -47,7 +48,7 @@ func main() {
 		},
 	}
 
-	server, err := client.CreateGameServer(req)
+	server, err := client.CreateGameServer(context.Background(), req)
 	if err != nil {
 		panic(err)
 	}

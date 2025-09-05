@@ -2,6 +2,7 @@ package dathost
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,9 +12,9 @@ import (
 )
 
 // ListGameServers implements DatHostClientv01.
-func (dc *dathostClientv01) ListGameServers() ([]GameServer, error) {
+func (dc *dathostClientv01) ListGameServers(ctx context.Context) ([]GameServer, error) {
 	ep := "https://dathost.net/api/0.1/game-servers"
-	req, err := http.NewRequest("GET", ep, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", ep, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +35,7 @@ func (dc *dathostClientv01) ListGameServers() ([]GameServer, error) {
 }
 
 // CreateGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) CreateGameServer(data CreateGameServerRequest) (*GameServer, error) {
+func (dc *dathostClientv01) CreateGameServer(ctx context.Context, data CreateGameServerRequest) (*GameServer, error) {
 	ep := "https://dathost.net/api/0.1/game-servers"
 	b := &bytes.Buffer{}
 	contentType, err := data.ToFormData(b)
@@ -42,7 +43,7 @@ func (dc *dathostClientv01) CreateGameServer(data CreateGameServerRequest) (*Gam
 		return nil, xerrors.Errorf("failed to create form data: %w", err)
 	}
 
-	req, _ := http.NewRequest("PUT", ep, b)
+	req, _ := http.NewRequestWithContext(ctx, "PUT", ep, b)
 	dc.addHeader(req)
 	req.Header.Add("Content-Type", contentType)
 
@@ -60,9 +61,9 @@ func (dc *dathostClientv01) CreateGameServer(data CreateGameServerRequest) (*Gam
 }
 
 // DeleteGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) DeleteGameServer(id string) error {
+func (dc *dathostClientv01) DeleteGameServer(ctx context.Context, id string) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s", id)
-	req, _ := http.NewRequest("DELETE", ep, nil)
+	req, _ := http.NewRequestWithContext(ctx, "DELETE", ep, nil)
 
 	dc.addHeader(req)
 
@@ -79,9 +80,9 @@ func (dc *dathostClientv01) DeleteGameServer(id string) error {
 }
 
 // GetGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) GetGameServer(id string) (*GameServer, error) {
+func (dc *dathostClientv01) GetGameServer(ctx context.Context, id string) (*GameServer, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s", id)
-	req, _ := http.NewRequest("GET", ep, nil)
+	req, _ := http.NewRequestWithContext(ctx, "GET", ep, nil)
 	dc.addHeader(req)
 
 	res, err := http.DefaultClient.Do(req)
@@ -98,7 +99,7 @@ func (dc *dathostClientv01) GetGameServer(id string) (*GameServer, error) {
 }
 
 // UpdateGameServer implements DatHostClientv01.
-func (dc *dathostClientv01) UpdateGameServer(id string, data CreateGameServerRequest) error {
+func (dc *dathostClientv01) UpdateGameServer(ctx context.Context, id string, data CreateGameServerRequest) error {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s", id)
 	b := &bytes.Buffer{}
 	contentType, err := data.ToFormData(b)
@@ -106,7 +107,7 @@ func (dc *dathostClientv01) UpdateGameServer(id string, data CreateGameServerReq
 		return xerrors.Errorf("failed to create form data: %w", err)
 	}
 
-	req, err := http.NewRequest("PUT", ep, b)
+	req, err := http.NewRequestWithContext(ctx, "PUT", ep, b)
 	if err != nil {
 		return xerrors.Errorf("failed to create request: %w", err)
 	}
@@ -123,9 +124,9 @@ func (dc *dathostClientv01) UpdateGameServer(id string, data CreateGameServerReq
 }
 
 // GetGameServerMetrics implements DatHostClientv01.
-func (dc *dathostClientv01) GetGameServerMetrics(id string) (*GameServerMetrics, error) {
+func (dc *dathostClientv01) GetGameServerMetrics(ctx context.Context, id string) (*GameServerMetrics, error) {
 	ep := fmt.Sprintf("https://dathost.net/api/0.1/game-servers/%s/metrics", id)
-	req, _ := http.NewRequest("GET", ep, nil)
+	req, _ := http.NewRequestWithContext(ctx, "GET", ep, nil)
 	dc.addHeader(req)
 
 	res, err := http.DefaultClient.Do(req)

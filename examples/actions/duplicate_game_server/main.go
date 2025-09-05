@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -11,7 +12,7 @@ func main() {
 	client := common.MustGetClient()
 	serverID := os.Args[1]
 
-	server, err := client.DuplicateGameServer(serverID)
+	server, err := client.DuplicateGameServer(context.Background(), serverID)
 	if err != nil {
 		panic(err)
 	}

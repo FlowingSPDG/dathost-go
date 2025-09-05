@@ -1,6 +1,7 @@
 package dathost
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -22,39 +23,49 @@ func NewDathostClientv01(username, password string) DatHostClientv01 {
 // DatHostClientv01 Client API v0.1
 type DatHostClientv01 interface {
 	// General APIs
-	ListGameServers() ([]GameServer, error)
-	CreateGameServer(req CreateGameServerRequest) (*GameServer, error)
-	DeleteGameServer(id string) error
-	GetGameServer(id string) (*GameServer, error)
-	UpdateGameServer(id string, req CreateGameServerRequest) error
-	GetGameServerMetrics(id string) (*GameServerMetrics, error)
-	// UpdateSubscription(id string) // https://dathost.readme.io/reference/post_api-0-1-game-servers-server-id-subscription // TODO.
+	ListGameServers(ctx context.Context) ([]GameServer, error)
+	CreateGameServer(ctx context.Context, req CreateGameServerRequest) (*GameServer, error)
+	DeleteGameServer(ctx context.Context, id string) error
+	GetGameServer(ctx context.Context, id string) (*GameServer, error)
+	UpdateGameServer(ctx context.Context, id string, req CreateGameServerRequest) error
+	GetGameServerMetrics(ctx context.Context, id string) (*GameServerMetrics, error)
 
 	// Actions API
-	DuplicateGameServer(id string) (*GameServer, error)
-	ResetGameServer(id string) error
-	StartGameServer(id string, data StartGameServerBody) error
-	StopGameServer(id string) error
-	SyncFilesGameServer(id string) error
+	DuplicateGameServer(ctx context.Context, id string) (*GameServer, error)
+	ResetGameServer(ctx context.Context, id string) error
+	StartGameServer(ctx context.Context, id string, data StartGameServerBody) error
+	StopGameServer(ctx context.Context, id string) error
+	SyncFilesGameServer(ctx context.Context, id string) error
 
 	// File Management API
-	// ListFilesOnGameServer(id string) ([]string, error)
-	// DeleteFilesFromGameServer(id string, path string) error
-	// DownloadFileFromGameServer(id string, path string) ([]byte, error)
-	// UploadFileToGameServer(id string, path string, data []byte) error
-	// MoveFileOnGameServer(id string, from string, to string) error
-	// RegenerateFTPPasswordForGameServer(id string) error
-	// UnzipFileOnGameServer(id string, path string) error
+	ListFilesOnGameServer(ctx context.Context, id string, path string) ([]FileInfo, error)
+	DeleteFilesFromGameServer(ctx context.Context, id string, path string) error
+	DownloadFileFromGameServer(ctx context.Context, id string, path string) ([]byte, error)
+	UploadFileToGameServer(ctx context.Context, id string, path string, data []byte) error
+	MoveFileOnGameServer(ctx context.Context, id string, from string, to string) error
+	RegenerateFTPPasswordForGameServer(ctx context.Context, id string) (*FTPPasswordResponse, error)
+	UnzipFileOnGameServer(ctx context.Context, id string, path string) error
 
-	// // Console API
-	GetLastLineFromConsole(id string, maxLines int) (*GetLastLineFromConsoleResponse, error)
-	SendCommandToConsole(id string, command string) error
+	// Console API
+	GetLastLineFromConsole(ctx context.Context, id string, maxLines int) (*GetLastLineFromConsoleResponse, error)
+	SendCommandToConsole(ctx context.Context, id string, command string) error
 
-	// // CS2 API
-	// StartCS2Match
-	// GetCS2Match
-	// CancelCS2Match
-	// AddPlayerForCS2Match
+	// CS2 Matches API
+	StartCS2Match(ctx context.Context, id string, req StartCS2MatchRequest) (*CS2Match, error)
+	GetCS2Match(ctx context.Context, id string) (*CS2Match, error)
+	CancelCS2Match(ctx context.Context, id string) error
+	AddPlayerToCS2Match(ctx context.Context, id string, req AddPlayerToCS2MatchRequest) error
+
+	// Account API
+	GetCurrentAccount(ctx context.Context) (*Account, error)
+	ListInvoices(ctx context.Context) ([]Invoice, error)
+	GetInvoiceAsHTML(ctx context.Context, id string) (string, error)
+
+	// System API
+	GetCustomDomains(ctx context.Context) ([]CustomDomain, error)
+
+	// Subscription API
+	UpdateSubscription(ctx context.Context, id string, req UpdateSubscriptionRequest) error
 }
 
 func (dc *dathostClientv01) addHeader(req *http.Request) {

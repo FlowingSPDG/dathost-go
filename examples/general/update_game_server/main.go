@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/FlowingSPDG/dathost-go"
@@ -53,7 +54,10 @@ func main() {
 
 	serverID := os.Args[1]
 
-	if err := client.UpdateGameServer(serverID, req); err != nil {
+	if err := client.UpdateGameServer(context.Background(), serverID, req); err != nil {
 		panic(err)
 	}
 }
+
+
+
